@@ -158,6 +158,19 @@ input { font: inherit; color: inherit; }
 .dots i.on { background: var(--orange); }
 
 .map-card { grid-column: 1 / 5; grid-row: 2; }
+.card__tools { display: flex; align-items: center; gap: 10px; }
+
+/* Full-page map: the card covers the whole window */
+.map-card--full {
+  position: fixed;
+  inset: 16px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 0 100vmax rgb(8 8 12 / 0.7);
+  animation: rise 0.25s ease-out;
+}
+.map-card--full .map { flex: 1; aspect-ratio: auto; max-height: none; }
 .side-col { grid-column: 5; grid-row: 1 / 3; display: flex; flex-direction: column; gap: 14px; }
 
 .legend { display: flex; gap: 6px; flex-wrap: wrap; }

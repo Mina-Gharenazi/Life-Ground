@@ -31,6 +31,7 @@ export default function App() {
   const { ground } = store
   const [areaId, go] = useRoute()
   const [adding, setAdding] = useState(false)
+  const [fullMap, setFullMap] = useState(false)
   const [pulseId, setPulseId] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
@@ -46,6 +47,16 @@ export default function App() {
     const t = setTimeout(() => setNotice(null), 3000)
     return () => clearTimeout(t)
   }, [notice])
+
+  // Close the full-page map with the Escape key
+  useEffect(() => {
+    if (!fullMap) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFullMap(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [fullMap])
 
   const area = areaId ? ground.areas.find((a) => a.id === areaId) : undefined
   const sorted = [...ground.areas].sort((a, b) => b.importance - a.importance)
@@ -141,20 +152,37 @@ export default function App() {
             <ActivityDots days={days} />
           </div>
 
-          <section className="card map-card">
+          <section className={`card map-card ${fullMap ? 'map-card--full' : ''}`}>
             <div className="card__head">
               <div>
                 <h2>Your ground</h2>
                 <p className="muted">Size is what matters to you — color is what's happening.</p>
               </div>
-              <div className="legend" aria-hidden>
-                <span><i className="lg lg--lush" />lush</span>
-                <span><i className="lg lg--mixed" />mixed</span>
-                <span><i className="lg lg--struggling" />struggling</span>
-                <span><i className="lg lg--barren" />barren</span>
+              <div className="card__tools">
+                <div className="legend" aria-hidden>
+                  <span><i className="lg lg--lush" />lush</span>
+                  <span><i className="lg lg--mixed" />mixed</span>
+                  <span><i className="lg lg--struggling" />struggling</span>
+                  <span><i className="lg lg--barren" />barren</span>
+                </div>
+                <button
+                  className="icon-btn"
+                  aria-label={fullMap ? 'Exit full page' : 'Expand to full page'}
+                  title={fullMap ? 'Exit full page (Esc)' : 'Expand to full page'}
+                  onClick={() => setFullMap(!fullMap)}
+                >
+                  <Icon name={fullMap ? 'collapse' : 'expand'} />
+                </button>
               </div>
             </div>
-            <GroundMap areas={ground.areas} onOpen={go} pulseId={pulseId} />
+            <GroundMap
+              areas={ground.areas}
+              onOpen={(id) => {
+                setFullMap(false)
+                go(id)
+              }}
+              pulseId={pulseId}
+            />
           </section>
 
           <aside className="side-col">

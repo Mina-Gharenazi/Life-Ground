@@ -11,6 +11,8 @@ const PATHS = {
   trash: 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13',
   x: 'M6 6l12 12M18 6L6 18',
   pencil: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4',
+  expand: 'M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7',
+  collapse: 'M20 10h-6V4M14 10l7-7M4 14h6v6M10 14l-7 7',
 } as const
 
 export function Icon({ name }: { name: keyof typeof PATHS }) {
