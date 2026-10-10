@@ -7,6 +7,14 @@ Your life as one map. Each life area is a plot of land:
 
 It's not a to-do list. You check in by tapping a plot, picking whatever tags are true right now, and pressing **Tend this land**.
 
+## Look
+
+A dark dashboard with rounded cards, violet and lavender accents, and orange highlights:
+
+- **Overview:** stat cards (areas, % alive, check-ins this week, active days), the map, a "ground balance" donut, and a gradient "worth a look" card that nudges you toward quiet areas.
+- **Plot colors:** violet = lush, lavender = mixed, orange = struggling, striped = barren (never checked in).
+- **Area screen:** a vitality gauge, an importance slider with a live mini-map, the tag check-in, and the history.
+
 ## Run it
 
 ```bash
@@ -26,8 +34,8 @@ Everything is saved in your browser's `localStorage`. Nothing is sent anywhere. 
 |---|---|
 | `src/model.ts` | Data types, tags, vitality score, streaks, "worth a look", backup validation |
 | `src/treemap.ts` | Squarified treemap that sizes plots by importance |
-| `src/colors.ts` | Vitality → land color (terracotta → tan → green) |
+| `src/colors.ts` | Vitality → plot color (orange → lavender → violet) |
 | `src/store.ts` | State + localStorage persistence, export/import |
-| `src/components/` | Map, area detail/check-in, add-area dialog |
+| `src/components/` | Dashboard widgets, map, area detail/check-in, add-area dialog |
 
 See [`docs/SCORING.md`](docs/SCORING.md) for the exact formulas.

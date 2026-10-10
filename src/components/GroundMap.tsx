@@ -15,37 +15,44 @@ type Props = {
 export function GroundMap({ areas, onOpen, highlightId, pulseId, compact }: Props) {
   const now = Date.now()
   const ref = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState(600)
+  const [size, setSize] = useState({ w: 600, h: 600 })
 
   // Plot labels adapt to the plot's real pixel size, so measure the map.
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const ro = new ResizeObserver(([e]) => setSize(e.contentRect.width))
+    const ro = new ResizeObserver(([e]) => setSize({ w: e.contentRect.width || 1, h: e.contentRect.height || 1 }))
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
+  // Lay out in real pixels so plots stay close to square at any aspect ratio,
+  // then convert to % so they animate smoothly when sizes change.
   const tiles = useMemo(
     () =>
       squarify(
         areas.map((a) => ({ value: a.importance, data: a })),
-        { x: 0, y: 0, w: 100, h: 100 },
-      ),
-    [areas],
+        { x: 0, y: 0, w: size.w, h: size.h },
+      ).map(({ rect, data }) => ({
+        data,
+        px: rect,
+        rect: { x: (rect.x / size.w) * 100, y: (rect.y / size.h) * 100, w: (rect.w / size.w) * 100, h: (rect.h / size.h) * 100 },
+      })),
+    [areas, size],
   )
 
   return (
     <div ref={ref} className={`map ${compact ? 'map--compact' : ''}`} role="list">
-      {tiles.map(({ rect, data: area }) => {
+      {tiles.map(({ rect, px, data: area }) => {
         const v = vitality(area, now)
         const state = vitalityState(v)
         const colors = plotColors(v)
         const last = area.checkIns[0]
         const s = streak(area)
-        const wPx = (rect.w / 100) * size
-        const hPx = (rect.h / 100) * size
-        const roomy = wPx > 120 && hPx > 95
-        const tiny = wPx < 90 || hPx < 50
+        const wPx = px.w
+        const hPx = px.h
+        const roomy = wPx > 120 && hPx > 110
+        const tiny = wPx < 100 || hPx < 60
+        const showImp = wPx >= 130 && hPx >= 60
         const classes = [
           'plot',
           `plot--${state}`,
@@ -63,7 +70,7 @@ export function GroundMap({ areas, onOpen, highlightId, pulseId, compact }: Prop
               top: `${rect.y}%`,
               width: `${rect.w}%`,
               height: `${rect.h}%`,
-              ['--bg' as string]: colors.bg,
+              ['--bg-c' as string]: colors.bg,
               ['--fg' as string]: colors.fg,
             }}
             onClick={onOpen ? () => onOpen(area.id) : undefined}
@@ -74,8 +81,8 @@ export function GroundMap({ areas, onOpen, highlightId, pulseId, compact }: Prop
               {!compact && (
                 <>
                   <span className={`plot__head ${tiny ? 'plot__head--tiny' : ''}`}>
-                    <span className="plot__name">{area.name}</span>
-                    {!tiny && <span className="plot__imp">{area.importance}/10</span>}
+                    {wPx >= 56 && <span className="plot__name">{area.name}</span>}
+                    {showImp && <span className="plot__imp">{area.importance}/10</span>}
                   </span>
                   {roomy && (
                     <span className="plot__body">

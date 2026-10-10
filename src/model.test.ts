@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aliveShare, checkInScore, parseGround, sampleGround, vitality, vitalityState, worthALook, type Area } from './model'
+import { activeDays, aliveShare, balance, checkInScore, checkInsSince, parseGround, sampleGround, vitality, vitalityState, worthALook, type Area } from './model'
 import { squarify } from './treemap'
 
 const DAY = 86400000
@@ -65,4 +65,15 @@ describe('parseGround', () => {
     expect(parseGround(JSON.parse(JSON.stringify(g)))).toEqual(g)
   })
   it('rejects junk', () => expect(() => parseGround({ foo: 1 })).toThrow())
+})
+
+describe('dashboard stats', () => {
+  it('counts check-ins, active days and balance', () => {
+    const areas = [area([[0, ['on track']], [2, ['behind']], [10, ['neutral']]], 6), area([], 4)]
+    expect(checkInsSince(areas, 7, now)).toBe(2)
+    expect(activeDays(areas, 3, now)).toEqual([true, false, true])
+    const b = balance(areas, now)
+    expect(b.barren).toBeCloseTo(0.4)
+    expect(b.lush + b.mixed + b.struggling).toBeCloseTo(0.6)
+  })
 })

@@ -214,3 +214,37 @@ export function sampleGround(now = Date.now()): Ground {
     ],
   }
 }
+
+// ---------- dashboard stats ----------
+
+const startOfDay = (t: number) => {
+  const d = new Date(t)
+  d.setHours(0, 0, 0, 0)
+  return d.getTime()
+}
+
+/** Number of check-ins in the last `days` days. */
+export function checkInsSince(areas: Area[], days: number, now = Date.now()): number {
+  const from = now - days * DAY
+  return areas.reduce((n, a) => n + a.checkIns.filter((c) => c.at >= from).length, 0)
+}
+
+/** For each of the last `days` days (oldest first): did you check in on anything? */
+export function activeDays(areas: Area[], days: number, now = Date.now()): boolean[] {
+  const today = startOfDay(now)
+  const hit = new Set(areas.flatMap((a) => a.checkIns.map((c) => startOfDay(c.at))))
+  return Array.from({ length: days }, (_, i) => {
+    const day = new Date(today)
+    day.setDate(day.getDate() - (days - 1 - i))
+    return hit.has(day.getTime())
+  })
+}
+
+/** Share of the map (by importance) in each vitality state. */
+export function balance(areas: Area[], now = Date.now()): Record<VitalityState, number> {
+  const out: Record<VitalityState, number> = { lush: 0, mixed: 0, struggling: 0, barren: 0 }
+  const total = areas.reduce((a, x) => a + x.importance, 0)
+  if (total === 0) return out
+  for (const a of areas) out[vitalityState(vitality(a, now))] += a.importance / total
+  return out
+}
